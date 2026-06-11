@@ -1,0 +1,56 @@
+name: publish-nuget
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    if: github.event.pull_request.merged == true
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.x'
+
+      - name: Extract version
+        id: version
+        shell: pwsh
+        run: |
+          $xml = [xml](Get-Content "O10WPFControls.csproj")
+          $version = $xml.SelectSingleNode("//Version").InnerText
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "value=$version"
+          Write-Host "Publishing version: $version"
+
+      - name: Build
+        run: dotnet build O10WPFControls.csproj --configuration Release
+
+      - name: Pack
+        run: dotnet pack O10WPFControls.csproj --configuration Release --no-build --output ./nupkg
+
+      - name: Publish to NuGet
+        run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+
+      - name: Tag release
+        shell: pwsh
+        run: |
+          $tag = "v${{ steps.version.outputs.value }}"
+          $existing = git tag -l $tag
+          if (-not $existing) {
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git tag $tag
+            git push origin $tag
+            Write-Host "Created tag $tag"
+          } else {
+            Write-Host "Tag $tag already exists, skipping."
+          }
