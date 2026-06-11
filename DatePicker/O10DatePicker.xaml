@@ -25,7 +25,7 @@
             <Setter Property="Background" Value="White"/>
             <Setter Property="Foreground" Value="#333"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Cursor" Value="IBeam"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
@@ -46,7 +46,7 @@
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Padding" Value="8"/>
+            <Setter Property="Padding" Value="2,0"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -161,7 +161,8 @@
                     BorderBrush="#DDD"
                     BorderThickness="1"
                     CornerRadius="0"
-                    Effect="{StaticResource dropShadow}">
+                    Effect="{StaticResource dropShadow}"
+                    KeyDown="CalendarBorder_KeyDown">
                 <Grid Width="320" Margin="0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="50"/>

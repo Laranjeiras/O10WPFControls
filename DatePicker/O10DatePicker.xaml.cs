@@ -1,10 +1,7 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-/// <summary>
-/// Interaction logic for O10DatePicker.xaml
-/// </summary>
 using System.Globalization;
 using System.Text.RegularExpressions;
 
@@ -120,6 +117,8 @@ namespace O10WPFControls.DatePicker;
             _currentDate = DateTime.Today;
             txtDate.Text = Placeholder;
             RenderCalendar();
+            Loaded += OnLoaded;
+            Unloaded += OnUnloaded;
         }
 
         #region Events
@@ -129,11 +128,60 @@ namespace O10WPFControls.DatePicker;
 
         #endregion
 
+        #region Popup Focus Management
+
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            var window = Window.GetWindow(this);
+            if (window != null)
+                window.PreviewMouseDown += OnWindowPreviewMouseDown;
+        }
+
+        private void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            var window = Window.GetWindow(this);
+            if (window != null)
+                window.PreviewMouseDown -= OnWindowPreviewMouseDown;
+        }
+
+        private void OnWindowPreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (!calendarPopup.IsOpen)
+                return;
+            var source = e.OriginalSource as DependencyObject;
+            if (source == null)
+                return;
+            if (!IsVisualDescendant(calendarPopup.Child, source) && !IsVisualDescendant(this, source))
+                calendarPopup.IsOpen = false;
+        }
+
+        private static bool IsVisualDescendant(DependencyObject? parent, DependencyObject child)
+        {
+            var current = child;
+            while (current != null)
+            {
+                if (current == parent)
+                    return true;
+                current = VisualTreeHelper.GetParent(current);
+            }
+            return false;
+        }
+
+        private void CalendarBorder_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                calendarPopup.IsOpen = false;
+                e.Handled = true;
+            }
+        }
+
+        #endregion
+
         #region Input Handling
 
         private void TxtDate_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            // Permite apenas números e barras
             e.Handled = !Regex.IsMatch(e.Text, @"[0-9/]");
         }
 
@@ -142,16 +190,29 @@ namespace O10WPFControls.DatePicker;
             if (_updatingText) return;
             var text = txtDate.Text;
 
-            // Auto-formatação: adiciona barras automaticamente
-            if (text.Length == 2 && !text.Contains("/"))
-                txtDate.Text = text + "/";
-            else if (text.Length == 5 && text.Count(c => c == '/') == 1)
-                txtDate.Text = text + "/";
+            _updatingText = true;
+            try
+            {
+                if (text.Length == 2 && !text.Contains("/"))
+                {
+                    txtDate.Text = text + "/";
+                    txtDate.CaretIndex = txtDate.Text.Length;
+                    return;
+                }
 
-            // Move cursor para o final
+                if (text.Length == 5 && text.Count(c => c == '/') == 1)
+                {
+                    txtDate.Text = text + "/";
+                    txtDate.CaretIndex = txtDate.Text.Length;
+                    return;
+                }
+            }
+            finally
+            {
+                _updatingText = false;
+            }
+
             txtDate.CaretIndex = txtDate.Text.Length;
-
-            // Valida a data
             ValidateDate(text);
         }
 
@@ -159,26 +220,42 @@ namespace O10WPFControls.DatePicker;
         {
             if (e.Key == Key.Enter)
             {
-                // Enter move para o próximo foco
                 e.Handled = true;
                 MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+                return;
             }
-            else if (e.Key == Key.Escape)
+            if (e.Key == Key.Escape)
             {
                 calendarPopup.IsOpen = false;
+                e.Handled = true;
             }
         }
 
         private void TxtDate_GotFocus(object sender, RoutedEventArgs e)
         {
-            // Seleciona todo o texto ao focar
+            if (txtDate.Text == Placeholder)
+            {
+                _updatingText = true;
+                txtDate.Text = "";
+                _updatingText = false;
+                return;
+            }
             txtDate.SelectAll();
         }
 
         private void TxtDate_LostFocus(object sender, RoutedEventArgs e)
         {
-            // Valida ao perder o foco
-            ValidateDate(txtDate.Text);
+            var text = txtDate.Text;
+            if (string.IsNullOrEmpty(text))
+            {
+                _updatingText = true;
+                txtDate.Text = Placeholder;
+                _updatingText = false;
+                SelectedDate = null;
+                IsDateValid = true;
+                return;
+            }
+            ValidateDate(text);
         }
 
         private void ValidateDate(string text)
@@ -198,11 +275,10 @@ namespace O10WPFControls.DatePicker;
                 _currentDate = date;
                 RenderCalendar();
                 OnDateChanged(date);
+                return;
             }
-            else
-            {
-                IsDateValid = false;
-            }
+
+            IsDateValid = false;
         }
 
         #endregion
