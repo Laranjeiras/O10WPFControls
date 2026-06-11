@@ -56,3 +56,4 @@ secrets.json
 
 # Azure Functions
 local.settings.json
+.claude/settings.json
