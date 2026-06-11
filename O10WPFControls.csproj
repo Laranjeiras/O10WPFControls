@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <!-- NuGet package metadata -->
+    <PackageId>O10WPFControls</PackageId>
+    <Version>1.0.3</Version>
+    <Authors>Carlos Alexandre Laranjeiras</Authors>
+    <Description>WPF custom controls for Brazilian UIs — includes O10DatePicker with calendar popup, auto-formatting and Portuguese localization.</Description>
+    <PackageTags>wpf;controls;datepicker;erp;brazil</PackageTags>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+</Project>

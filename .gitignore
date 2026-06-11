@@ -1,0 +1,58 @@
+# Build
+bin/
+obj/
+
+# User-specific files
+*.user
+*.rsuser
+*.suo
+
+# Visual Studio
+.vs/
+
+# Rider
+.idea/
+
+# VS Code
+.vscode/
+
+# NuGet
+packages/
+*.nupkg
+
+# Test Results
+TestResults/
+
+# Publish
+publish/
+
+# Logs
+*.log
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+
+# Coverage
+coverage/
+coverage-results/
+
+# Entity Framework
+*.dbmdl
+
+# Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+
+# DotCover
+*.dotCover
+
+# Local settings
+appsettings.Development.json
+secrets.json
+
+# Azure Functions
+local.settings.json

@@ -1,0 +1,241 @@
+<UserControl x:Class="O10WPFControls.DatePicker.O10DatePicker"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:helpers="clr-namespace:O10WPFControls"
+             mc:Ignorable="d"
+             x:Name="root">
+
+    <UserControl.Resources>
+        <helpers:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+
+        <DropShadowEffect x:Key="dropShadow"
+                          BlurRadius="10"
+                          ShadowDepth="2"
+                          Opacity="0.3"
+                          Color="#000000"/>
+
+        <!-- Estilos isolados do tema do host — OverridesDefaultStyle impede que o MD3 sobreponha -->
+        <Style x:Key="O10TextBoxStyle" TargetType="TextBox">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#333"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Margin="{TemplateBinding Padding}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="O10CalendarButtonStyle" TargetType="Button">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="O10NavButtonStyle" TargetType="Button">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="O10DayButtonStyle" TargetType="Button">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Label -->
+        <TextBlock Grid.Row="0"
+                   Text="{Binding ElementName=root, Path=Label}"
+                   FontSize="14"
+                   Foreground="#5A6B7C"
+                   Margin="0,0,0,8"
+                   Visibility="{Binding ElementName=root, Path=HasLabel, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+        <!-- Container do DatePicker -->
+        <Border Grid.Row="1"
+                BorderBrush="{Binding ElementName=root, Path=BorderBrushColor}"
+                BorderThickness="1"
+                CornerRadius="0"
+                Height="{Binding ElementName=root, Path=ControlHeight}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- TextBox digitável — estilo isolado do tema do host -->
+                <TextBox x:Name="txtDate"
+                         Grid.Column="0"
+                         Style="{StaticResource O10TextBoxStyle}"
+                         PreviewTextInput="TxtDate_PreviewTextInput"
+                         TextChanged="TxtDate_TextChanged"
+                         KeyDown="TxtDate_KeyDown"
+                         GotFocus="TxtDate_GotFocus"
+                         LostFocus="TxtDate_LostFocus"/>
+
+                <!-- Botão Calendário -->
+                <Button x:Name="btnCalendar"
+                        Grid.Column="1"
+                        Width="40"
+                        Style="{StaticResource O10CalendarButtonStyle}"
+                        Click="BtnCalendar_Click">
+                    <Viewbox Width="20" Height="20">
+                        <Canvas Width="24" Height="24">
+                            <Path Fill="#5A6B7C"
+                                  Data="M19,4H18V2H16V4H8V2H6V4H5C3.89,4 3,4.89 3,6V20C3,21.1 3.89,22 5,22H19C20.1,22 21,21.1 21,20V6C21,4.89 20.1,4 19,4M19,20H5V10H19V20M19,8H5V6H19V8Z"/>
+                        </Canvas>
+                    </Viewbox>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Popup do Calendário -->
+        <Popup x:Name="calendarPopup"
+               PlacementTarget="{Binding ElementName=txtDate}"
+               Placement="Bottom"
+               StaysOpen="False"
+               AllowsTransparency="True"
+               PopupAnimation="Fade">
+            <Border Background="White"
+                    BorderBrush="#DDD"
+                    BorderThickness="1"
+                    CornerRadius="0"
+                    Effect="{StaticResource dropShadow}">
+                <Grid Width="320" Margin="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="50"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Header Azul -->
+                    <Border Grid.Row="0" Background="#1976D2">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="40"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="40"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Button Grid.Column="0"
+                                    Content="&#x2039;"
+                                    FontSize="20"
+                                    FontWeight="Bold"
+                                    Style="{StaticResource O10NavButtonStyle}"
+                                    Click="BtnPrevious_Click"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"/>
+
+                            <TextBlock x:Name="txtMonthYear"
+                                       Grid.Column="1"
+                                       FontSize="18"
+                                       FontWeight="SemiBold"
+                                       Foreground="White"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+
+                            <Button Grid.Column="2"
+                                    Content="&#x203A;"
+                                    FontSize="20"
+                                    FontWeight="Bold"
+                                    Style="{StaticResource O10NavButtonStyle}"
+                                    Click="BtnNext_Click"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Dias da Semana -->
+                    <Grid Grid.Row="1" Margin="5,10,5,5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="Seg" FontWeight="SemiBold" Foreground="#666" HorizontalAlignment="Center" FontSize="12"/>
+                        <TextBlock Grid.Column="1" Text="Ter" FontWeight="SemiBold" Foreground="#666" HorizontalAlignment="Center" FontSize="12"/>
+                        <TextBlock Grid.Column="2" Text="Qua" FontWeight="SemiBold" Foreground="#666" HorizontalAlignment="Center" FontSize="12"/>
+                        <TextBlock Grid.Column="3" Text="Qui" FontWeight="SemiBold" Foreground="#666" HorizontalAlignment="Center" FontSize="12"/>
+                        <TextBlock Grid.Column="4" Text="Sex" FontWeight="SemiBold" Foreground="#666" HorizontalAlignment="Center" FontSize="12"/>
+                        <TextBlock Grid.Column="5" Text="S&#xE1;b" FontWeight="SemiBold" Foreground="#666" HorizontalAlignment="Center" FontSize="12"/>
+                        <TextBlock Grid.Column="6" Text="Dom" FontWeight="SemiBold" Foreground="#666" HorizontalAlignment="Center" FontSize="12"/>
+                    </Grid>
+
+                    <ItemsControl x:Name="daysGrid" Grid.Row="2" Margin="5">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="7"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                </Grid>
+            </Border>
+        </Popup>
+    </Grid>
+</UserControl>
