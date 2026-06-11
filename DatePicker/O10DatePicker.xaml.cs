@@ -114,6 +114,7 @@ namespace O10WPFControls.DatePicker;
         public O10DatePicker()
         {
             InitializeComponent();
+            txtDate.MaxLength = 10;
             _currentDate = DateTime.Today;
             txtDate.Text = Placeholder;
             RenderCalendar();
@@ -413,6 +414,7 @@ namespace O10WPFControls.DatePicker;
         #endregion
 
         #region Event Handlers
+
 
         private static void OnSelectedDateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
